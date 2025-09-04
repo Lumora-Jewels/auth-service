@@ -2,26 +2,32 @@ const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 
 const generateToken = (user) => {
-  return jwt.sign({ id: user._id, roles: user.roles }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN
+  return jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE
   });
 };
 
 exports.register = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { firstName, lastName, email, password } = req.body;
   try {
     const userExists = await User.findOne({ email });
     if (userExists) return res.status(400).json({ error: "Email already exists" });
 
-    const user = await User.create({ name, email, password });
+    const user = await User.create({ firstName, lastName, email, password });
     res.status(201).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      roles: user.roles,
-      token: generateToken(user)
+      token: generateToken(user),
+      user: {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt
+      }
     });
   } catch (err) {
+    console.error('Registration error:', err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -36,13 +42,19 @@ exports.login = async (req, res) => {
     if (!isMatch) return res.status(401).json({ error: "Invalid email or password" });
 
     res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      roles: user.roles,
-      token: generateToken(user)
+      token: generateToken(user),
+      user: {
+        _id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt
+      }
     });
   } catch (err) {
+    console.error('Login error:', err);
     res.status(500).json({ error: err.message });
   }
 };
