@@ -14,13 +14,13 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'yarn install'
+                sh 'npm install'
             }
         }
 
         stage('Build') {
             steps {
-                sh 'yarn build || echo "No build script, continue"'
+                sh 'npm run dev || echo "No build script, continue"'
             }
         }
 
